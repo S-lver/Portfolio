@@ -1,4 +1,3 @@
-
 (function(){
   "use strict";
 
@@ -160,8 +159,42 @@
     });
   }
 
+  /* ---------- Contact form (Netlify Forms) ---------- */
+  var form = document.getElementById('contactForm');
+  if (form) {
+    var submitBtn = document.getElementById('formSubmit');
+    var noteEl = document.getElementById('formNote');
+    var defaultNote = noteEl.textContent;
 
-    // ===== NEW: Netlify Forms Handler =====
+    function fieldOf(input){ return input.closest('.field'); }
+
+    function validate(){
+      var ok = true;
+      var nameInput = document.getElementById('cf-name');
+      var emailInput = document.getElementById('cf-email');
+      var msgInput = document.getElementById('cf-message');
+      var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      [ [nameInput, nameInput.value.trim().length > 0],
+        [emailInput, emailPattern.test(emailInput.value.trim())],
+        [msgInput, msgInput.value.trim().length > 3]
+      ].forEach(function(pair){
+        var el = pair[0], valid = pair[1];
+        var wrap = fieldOf(el);
+        wrap.classList.remove('invalid');
+        if (!valid) {
+          ok = false;
+          void wrap.offsetWidth;
+          wrap.classList.add('invalid');
+        }
+      });
+      return ok;
+    }
+
+    form.querySelectorAll('input, textarea').forEach(function(el){
+      el.addEventListener('input', function(){ fieldOf(el).classList.remove('invalid'); });
+    });
+
     form.addEventListener('submit', function(e){
       e.preventDefault();
       if (submitBtn.classList.contains('loading') || submitBtn.classList.contains('success')) return;
@@ -195,45 +228,6 @@
         noteEl.textContent = 'Oops! Something went wrong. Please try again or email me directly.';
         console.error('Error:', error);
       });
-    });
-  }
-
-    // Clear the error state as soon as someone starts fixing a field.
-    form.querySelectorAll('input, textarea').forEach(function(el){
-      el.addEventListener('input', function(){ fieldOf(el).classList.remove('invalid'); });
-    });
-
-    form.addEventListener('submit', function(e){
-      e.preventDefault();
-      if (submitBtn.classList.contains('loading') || submitBtn.classList.contains('success')) return;
-      if (!validate()) return;
-
-      var name = document.getElementById('cf-name').value.trim();
-      var email = document.getElementById('cf-email').value.trim();
-      var message = document.getElementById('cf-message').value.trim();
-
-      submitBtn.classList.add('loading');
-      noteEl.textContent = 'Getting your message ready…';
-
-      // ---- Default: hand off to the visitor's email client. ----
-      // To send silently instead (no mail app popup), replace this block with
-      // a fetch() call to a form backend, e.g. Formspree:
-      //   fetch('https://formspree.io/f/YOUR_ID', { method:'POST', headers:{'Accept':'application/json'}, body: new FormData(form) })
-      setTimeout(function(){
-        var subject = encodeURIComponent('Portfolio inquiry from ' + name);
-        var body = encodeURIComponent(message + '\n\n— ' + name + ' (' + email + ')');
-        window.location.href = 'mailto:hello@jordan.dev?subject=' + subject + '&body=' + body;
-
-        submitBtn.classList.remove('loading');
-        submitBtn.classList.add('success');
-        noteEl.textContent = 'Your email app should be open now — just hit send.';
-
-        setTimeout(function(){
-          submitBtn.classList.remove('success');
-          noteEl.textContent = defaultNote;
-          form.reset();
-        }, 3800);
-      }, 700);
     });
   }
 
