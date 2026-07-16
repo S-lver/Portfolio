@@ -160,7 +160,7 @@
     });
   }
 
-  /* ---------- Contact form ---------- */
+    /* ---------- Contact form ---------- */
   var form = document.getElementById('contactForm');
   if (form) {
     var submitBtn = document.getElementById('formSubmit');
@@ -191,6 +191,48 @@
       });
       return ok;
     }
+
+    // Clear the error state as soon as someone starts fixing a field.
+    form.querySelectorAll('input, textarea').forEach(function(el){
+      el.addEventListener('input', function(){ fieldOf(el).classList.remove('invalid'); });
+    });
+
+    // ===== NEW: Netlify Forms Handler =====
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      if (submitBtn.classList.contains('loading') || submitBtn.classList.contains('success')) return;
+      if (!validate()) return;
+
+      submitBtn.classList.add('loading');
+      noteEl.textContent = 'Sending your message…';
+
+      var formData = new FormData(form);
+
+      fetch('/', {
+        method: 'POST',
+        body: formData
+      })
+      .then(function(response) {
+        if (response.ok) {
+          submitBtn.classList.remove('loading');
+          submitBtn.classList.add('success');
+          noteEl.textContent = 'Message sent successfully! I\'ll get back to you soon.';
+          form.reset();
+          setTimeout(function(){
+            submitBtn.classList.remove('success');
+            noteEl.textContent = defaultNote;
+          }, 5000);
+        } else {
+          throw new Error('Network response was not ok');
+        }
+      })
+      .catch(function(error) {
+        submitBtn.classList.remove('loading');
+        noteEl.textContent = 'Oops! Something went wrong. Please try again or email me directly.';
+        console.error('Error:', error);
+      });
+    });
+  }
 
     // Clear the error state as soon as someone starts fixing a field.
     form.querySelectorAll('input, textarea').forEach(function(el){
