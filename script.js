@@ -160,42 +160,6 @@
     });
   }
 
-    /* ---------- Contact form ---------- */
-  var form = document.getElementById('contactForm');
-  if (form) {
-    var submitBtn = document.getElementById('formSubmit');
-    var noteEl = document.getElementById('formNote');
-    var defaultNote = noteEl.textContent;
-
-    function fieldOf(input){ return input.closest('.field'); }
-
-    function validate(){
-      var ok = true;
-      var nameInput = document.getElementById('cf-name');
-      var emailInput = document.getElementById('cf-email');
-      var msgInput = document.getElementById('cf-message');
-      var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-      [ [nameInput, nameInput.value.trim().length > 0],
-        [emailInput, emailPattern.test(emailInput.value.trim())],
-        [msgInput, msgInput.value.trim().length > 3]
-      ].forEach(function(pair){
-        var el = pair[0], valid = pair[1];
-        var wrap = fieldOf(el);
-        wrap.classList.remove('invalid');
-        if (!valid) {
-          ok = false;
-          void wrap.offsetWidth; // restart shake animation
-          wrap.classList.add('invalid');
-        }
-      });
-      return ok;
-    }
-
-    // Clear the error state as soon as someone starts fixing a field.
-    form.querySelectorAll('input, textarea').forEach(function(el){
-      el.addEventListener('input', function(){ fieldOf(el).classList.remove('invalid'); });
-    });
 
     // ===== NEW: Netlify Forms Handler =====
     form.addEventListener('submit', function(e){
